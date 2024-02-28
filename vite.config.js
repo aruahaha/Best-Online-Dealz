@@ -1,11 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { nodeExternalsPlugin } from 'esbuild-node-externals'
 import ViteCommonJS from 'vite-plugin-commonjs';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), nodeExternalsPlugin(),ViteCommonJS()],
+  plugins: [react(),ViteCommonJS()],
   optimizeDeps: {
     exclude: ['js-big-decimal']
   },

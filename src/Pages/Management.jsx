@@ -1,35 +1,36 @@
-import React, { Suspense, useEffect, useState } from "react";
-import { defer, Await, useLoaderData } from "react-router";
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import EditIcon from '@mui/icons-material/Edit';
+import { useNavigate } from 'react-router';
 import {
+    Button,
+    Checkbox,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    LinearProgress,
+    Paper,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
     TableRow,
-    Paper,
-    Button,
-    Dialog,
-    DialogActions,
-    DialogTitle,
-    DialogContent,
-    DialogContentText,
-    TextField,
-    Checkbox, // Import Checkbox
-    styled,
-    Alert,
-    LinearProgress
+    TextField, // Import Checkbox
+    styled
 } from "@mui/material";
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { getTable, delRow, addRow, getRowById, updateData } from "../Server/api";
-import { requireAuth, shortUrl } from "../utils";
-import { Link } from "react-router-dom";
 import axios from "axios";
-import EditIcon from '@mui/icons-material/Edit';
+import React, { Suspense, useEffect, useState } from "react";
+import { Await, defer, redirect, useLoaderData } from "react-router";
+import { Link } from "react-router-dom";
+import { addRow, delRow, getRowById, getTable, updateData } from "../Server/api";
+import { shortUrl } from "../utils";
+import { auth } from "../firebase.js";
+import Login from "./Login.jsx"
+
 
 export async function loader({ request }) {
-    await requireAuth();
     return defer({ rows: getTable() });
 }
 
@@ -59,6 +60,8 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 export default function Management() {
+    const navigate = useNavigate()
+    const [user, setUser] = useState(null)
     const rows = useLoaderData();
     const [editTableData, setEditTableData] = useState()
     const [editDialogOpen, setEditDialogOpen] = useState(false)
@@ -72,6 +75,23 @@ export default function Management() {
     const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
     const [selectedRowIds, setSelectedRowIds] = React.useState([]);
     const [selectAll, setSelectAll] = React.useState(false);
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged(user => {
+            setUser(user);
+        });
+        return () => unsubscribe();
+    }, []);
+
+    const handleSignOut = async () => {
+        try {
+            await auth.signOut();
+            navigate('/login');
+        } catch (error) {
+            console.error("Error signing out:", error);
+        }
+    };
+
 
 
     const handleClickOpen = () => {
@@ -245,22 +265,31 @@ export default function Management() {
     };
 
     const handleUpdate = () => {
-       updateData(editTableData.id,row.name,row.asin)
-       setOpen(false)
-       shortUrl(row.name, row.asin, row.additional )
-       setRow(prevRow => ({
-        ...prevRow,
-        additional: ""
-    }));
+        updateData(editTableData.id, row.name, row.asin)
+        setOpen(false)
+        shortUrl(row.name, row.asin, row.additional)
+        setRow(prevRow => ({
+            ...prevRow,
+            additional: ""
+        }));
+    }
+    
+
+    console.log(user)
+
+    if (user && user.providerData[0].providerId == "google.com") {
+        if (!user || user.email && user.email !== import.meta.env.VITE_ADMIN_USER_MAIL) {
+            return <Login />;
+        }
+    } else if (!user) {
+        return <Login />
     }
 
-    // const handleDeleteClick = (id) => {
-    //     setDeleteDialogOpen(true);
-    //     setSelectedRowIds([id]);
-    // }
+
 
     return (
         <>
+
             <div className="add-product-btn">
                 <Button variant="contained" onClick={handleClickOpen} >
                     <span>Add</span><AddCircleIcon />
@@ -280,12 +309,11 @@ export default function Management() {
                         Switch
                     </Button>
                 </Link>
-                <Button variant="contained" color="error" onClick={() => {
-                    localStorage.clear()
-                    window.location.reload(false)
-                }}>
-                    <span>Log Out</span>
-                </Button>
+                {user && (
+                    <Button variant="contained" color="error" onClick={handleSignOut}>
+                        <span>Log Out</span>
+                    </Button>
+                )}
             </div>
 
             <BootstrapDialog
@@ -378,7 +406,7 @@ export default function Management() {
                                             <TableCell>{row.asin}</TableCell>
                                             <TableCell>
                                                 <Button onClick={() => handleEditClick(row.id)}>
-                                                    <EditIcon sx={{color: "black"}} />
+                                                    <EditIcon sx={{ color: "black" }} />
                                                 </Button>
                                             </TableCell>
                                             {/* <TableCell>

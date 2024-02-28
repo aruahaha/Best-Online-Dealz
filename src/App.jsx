@@ -15,6 +15,8 @@ import OtherManagement, {loader as OtherManagementLoader} from "./Pages/OtherMan
 
 import OfferDetail from "./Pages/OfferDetail.jsx";
 import OtherOfferDetail, {loader as OtherOfferDetailLoader} from "./Pages/OtherOfferDetail.jsx";
+import { Denied } from "./Pages/Denied.jsx";
+import  SignUp  from "./Pages/SignUp.jsx";
 
 
 const router = createBrowserRouter(createRoutesFromElements(
@@ -33,6 +35,7 @@ const router = createBrowserRouter(createRoutesFromElements(
         <Route path="/login" element={<SignIn />} />
         <Route path="/management" element={<Management />} loader={ManagementLoader} exact />
         <Route path="/other-management" element={<OtherManagement />} loader={OtherManagementLoader} exact />
+        <Route path="/denied" element={<Denied/>} exact/>
     </Route>
 ))
 

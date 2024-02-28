@@ -1,5 +1,4 @@
-import React, { Suspense } from "react";
-import { requireAuth } from "../utils";
+import React, { Suspense, useEffect, useState } from "react";
 import { getOtherOffers, addOtherRow, delOtherRow } from "../Server/api";
 import { defer, useLoaderData, Await } from "react-router";
 import {
@@ -24,9 +23,10 @@ import {
 } from "@mui/material";
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Link } from "react-router-dom";
+import { auth } from "../firebase.js";
+import Login from "./Login.jsx"
 
 export async function loader() {
-    await requireAuth();
     return defer({ rows: getOtherOffers() });
 }
 
@@ -41,7 +41,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 export default function OtherManagement() {
     const rows = useLoaderData();
-    
+    const [user, setUser] = useState(null)
 
     const [open, setOpen] = React.useState(false);
     const [row, setRow] = React.useState({
@@ -54,6 +54,23 @@ export default function OtherManagement() {
     const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
     const [selectedRowIds, setSelectedRowIds] = React.useState([]);
     const [selectAll, setSelectAll] = React.useState(false);
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged(user => {
+            setUser(user);
+        });
+        return () => unsubscribe();
+    }, []);
+
+
+    const handleSignOut = async () => {
+        try {
+            await auth.signOut();
+            navigate('/login');
+        } catch (error) {
+            console.error("Error signing out:", error);
+        }
+    };
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -138,6 +155,14 @@ export default function OtherManagement() {
         setSelectedRowIds([]);
     };
 
+    if (user && user.providerData[0].providerId == "google.com") {
+        if (!user || user.email && user.email !== import.meta.env.VITE_ADMIN_USER_MAIL) {
+            return <Login />;
+        }
+    } else if (!user) {
+        return <Login />
+    }
+
     return (
         <>
             <div className="add-product-btn">
@@ -158,12 +183,11 @@ export default function OtherManagement() {
                         Switch
                     </Button>
                 </Link>
-                <Button variant="contained" color="error" onClick={() => {
-                    localStorage.clear()
-                    window.location.reload(false)
-                }}>
-                    <span>Log Out</span>
-                </Button>
+                {user && (
+                    <Button variant="contained" color="error" onClick={handleSignOut}>
+                        <span>Log Out</span>
+                    </Button>
+                )}
             </div>
 
             <BootstrapDialog

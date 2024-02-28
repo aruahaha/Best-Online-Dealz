@@ -105,8 +105,10 @@ html::-webkit-scrollbar {
         justify-content: space-between;
         padding: 0 38px;
         box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.11);
-        position: relative; /* Add this line */
-        z-index: 1000; /* Set a higher z-index value */
+        position: relative;
+        /* Add this line */
+        z-index: 1000;
+        /* Set a higher z-index value */
     }
 
     .mob-header-menu {
@@ -117,19 +119,25 @@ html::-webkit-scrollbar {
         align-items: center;
         text-align: center;
         transition: max-height 0.3s ease;
-        position: absolute; /* Add this line */
-        top: 91px; /* Adjust the top position as needed */
-        left: 0; /* Adjust the left position as needed */
-        width: 100%; /* Make it full width */
+        position: absolute;
+        /* Add this line */
+        top: 91px;
+        /* Adjust the top position as needed */
+        left: 0;
+        /* Adjust the left position as needed */
+        width: 100%;
+        /* Make it full width */
         background-color: #384152;
         /* border-bottom-left-radius: 20px;
         border-bottom-right-radius: 20px; */
-        z-index: 998; /* Set a lower z-index value initially */
+        z-index: 998;
+        /* Set a lower z-index value initially */
     }
 
     .active-menu {
         max-height: 250px;
-        transition: max-height 0.3s ease; /* Add this line for a smooth transition */
+        transition: max-height 0.3s ease;
+        /* Add this line for a smooth transition */
         z-index: 999;
     }
 
@@ -202,7 +210,7 @@ html::-webkit-scrollbar {
     width: 250px;
     object-fit: contain;
     margin-bottom: 20px;
-   
+
 }
 
 .item-container {
@@ -246,7 +254,7 @@ html::-webkit-scrollbar {
     margin: 10px 0 40px 0px;
 }
 
-@media (max-width: 1100px) {    
+@media (max-width: 1100px) {
 
     .home-page-offer {
         flex-direction: column;
@@ -392,7 +400,7 @@ html::-webkit-scrollbar {
     color: black;
 }
 
-.delete-row-btn{
+.delete-row-btn {
     background-color: rgb(185, 104, 37) !important;
 }
 
@@ -404,7 +412,7 @@ html::-webkit-scrollbar {
     gap: 1rem;
 }
 
-.delete-row-btn-2{
+.delete-row-btn-2 {
     display: flex;
     justify-content: center;
     margin-block: 30px;
@@ -502,7 +510,7 @@ html::-webkit-scrollbar {
 /*> About Page & Disclaimer Page */
 .about-div,
 .disclaimer-div {
-    padding: 20px 100px 100px ;
+    padding: 20px 100px 100px;
     font-size: clamp(1rem, 2.5vw, 1.5rem);
 }
 
@@ -523,3 +531,4 @@ html::-webkit-scrollbar {
 }
 
 /*> Login Page */
+

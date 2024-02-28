@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getAuth, signInWithEmailAndPassword, multiFactor, PhoneAuthProvider , RecaptchaVerifier } from "firebase/auth";
+import { signInWithPopup } from "firebase/auth"; // Import signInWithPopup
+import { auth, googleProvider } from "../firebase"; // Import googleProvider from firebase.js
 
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
@@ -9,20 +12,9 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-
-import { getUsers } from "../Server/api";
+import GoogleIcon from '@mui/icons-material/Google';
 
 const defaultTheme = createTheme();
-
-async function Auth(username, password) {
-    const user = await getUsers()
-    if (username === user[0].username && password === user[0].password) {
-        localStorage.setItem("loggedIn", true);
-        return true;
-    } else {
-        return false;
-    }
-}
 
 export default function SignIn() {
     const navigate = useNavigate();
@@ -31,25 +23,46 @@ export default function SignIn() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        const username = data.get('username');
+        const email = data.get('email');
         const password = data.get('password');
         const pathName = '/management';
 
         try {
-            const isAuthenticated = await Auth(username, password);
-            if (isAuthenticated) {
-                navigate(pathName);
+            const authInstance = getAuth();
+            const userCredential = await signInWithEmailAndPassword(authInstance, email, password);
+            navigate(pathName);
+        } catch (error) {
+            setError('Invalid email or password');
+            console.error("Error signing in:", error);
+        }
+    };
+
+    const handleGoogleSignIn = async () => {
+        try {
+            const result = await signInWithPopup(auth, googleProvider);
+            const user = result.user;
+            if (user.email === import.meta.env.VITE_ADMIN_USER_MAIL) {
+                // if (!user.emailVerified) {
+                //     await sendEmailVerification(auth.currentUser);
+                //     alert('Please verify your email before signing in.');
+                //     return;
+                // }
+                navigate('/management');
             } else {
-                setError('Invalid username or password');
+                await user.delete();
+                navigate('/denied');
             }
-        } catch (err) {
-            setError(err.message);
+        } catch (error) {
+            console.error("Error signing in with Google:", error);
         }
     };
 
     return (
-        <ThemeProvider theme={defaultTheme}>
-            <Container component="main" maxWidth="xs">
+        <ThemeProvider theme={defaultTheme} >
+            <Container component="main" maxWidth="xs" sx={{
+                marginTop: "50px",
+                marginBottom: "100px"
+            }}>
                 <CssBaseline />
                 <Box
                     sx={{
@@ -69,10 +82,10 @@ export default function SignIn() {
                             margin="normal"
                             required
                             fullWidth
-                            id="username"
-                            label="Username"
-                            name="username"
-                            autoComplete="username"
+                            id="email"
+                            label="Email Address"
+                            name="email"
+                            autoComplete="email"
                             autoFocus
                         />
                         <TextField
@@ -89,9 +102,26 @@ export default function SignIn() {
                             type="submit"
                             fullWidth
                             variant="contained"
-                            sx={{ mt: 3, mb: 5 }}
+                            sx={{ mt: 3, mb: 2 }}
                         >
                             Sign In
+                        </Button>
+
+                        <Button
+                            onClick={handleGoogleSignIn}
+                            fullWidth
+                            variant="contained"
+                            sx={{ mt: 1, mb: 2, backgroundColor: '#DB4437', color: '#fff' }} // Google's Red color
+                        >
+                            <div style={{
+                                display: "flex",
+                                gap: "10px",
+                                alignItems: "center",
+                                paddingBlock: "5px"
+                            }}>
+                                <GoogleIcon />
+                                Sign in with Google
+                            </div>
                         </Button>
                     </Box>
                 </Box>
